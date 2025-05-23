@@ -1,0 +1,17 @@
+[project]
+name = "master-epilepsy-detection"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "alive-progress>=3.2.0",
+    "ipykernel>=6.29.5",
+    "prettytable>=3.16.0",
+    "seaborn>=0.13.2",
+    "swanlab>=0.5.8",
+    "torch>=2.7.0",
+    "torchaudio>=2.7.0",
+    "torchmetrics>=1.7.1",
+    "torchvision>=0.22.0",
+]
