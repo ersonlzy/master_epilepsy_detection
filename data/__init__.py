@@ -1,4 +1,8 @@
 from torch.utils.data import Dataset
+from data.BONN import Bonn
+from data.CHBMIT import CHBMIT
+
+
 
 class DatasetBase(Dataset):  
     def __init__(self, args):
@@ -31,4 +35,6 @@ class DatasetBase(Dataset):
 
 registered_datasets = {
     "base": DatasetBase,
+    "chbmit": CHBMIT,
+    "bonn": Bonn
 }

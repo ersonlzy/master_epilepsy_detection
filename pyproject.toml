@@ -6,8 +6,11 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "alive-progress>=3.2.0",
+    "emoji>=2.14.1",
     "ipykernel>=6.29.5",
+    "mne>=1.9.0",
     "prettytable>=3.16.0",
+    "scikit-learn>=1.6.1",
     "seaborn>=0.13.2",
     "swanlab>=0.5.8",
     "torch>=2.7.0",

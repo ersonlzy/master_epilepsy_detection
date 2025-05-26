@@ -7,10 +7,10 @@ class CrossEntropyLoss(nn.Module):
     def __init__(self, args):
         super(CrossEntropyLoss, self).__init__()
         self.device = torch.device(args.device if torch.cuda.is_available() else "cpu")
-        self.criterion = nn.CrossEntropyLoss().to(self.device)
+        self.criterion = nn.CrossEntropyLoss()
 
     def forward(self, inputs, targets):
-        return label_smooth(inputs, targets, self.args.epsilon, inputs.shape[-1]).mean()
+        return self.criterion(inputs, targets)
     
 
 
@@ -27,8 +27,8 @@ class FocalLoss(nn.Module):
         # 计算概率 pt
         pt = torch.exp(- ce_loss_smoothing)
         # 计算 focal loss
-        focal_loss = (self.alpha * (1 - pt)**self.gamma * ce_loss_smoothing).mean()
-        return focal_loss
+        focal_loss = (self.alpha * (1 - pt)**self.gamma * ce_loss_smoothing)
+        return focal_loss.mean()
 
 
 def label_smooth(logits, targets, epsilon, num_classes):
@@ -53,6 +53,6 @@ class LabelSmoothingCrossEntropyLoss(nn.Module):
         # 应用标签平滑
         targets_smooth = (1 - self.epsilon) * targets_one_hot + self.epsilon / class_num
         # 计算加权的负对数似然损失
-        loss = (-targets_smooth * log_probs).sum(dim=-1)
-        return loss.mean()
+        loss = (-targets_smooth * log_probs).sum(dim=-1).mean()
+        return loss
 
