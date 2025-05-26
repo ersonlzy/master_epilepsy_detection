@@ -20,34 +20,34 @@ class Engine4Cla(EngineBase):
         total_step = len(self.train_dataloader) // self.args.batch_size * self.args.num_epochs
         epoch_per_step = self.args.num_epochs / total_step
         # step_loss_list = []
-        # with alive_bar(total_step, title="experiment is progressing: ", ) as bar:
-        #     bar()
-        train_outputs = None
-        train_targets = torch.tensor([])
-        for i, (samples, targets) in tqdm(enumerate(cycle(self.train_dataloader)), desc="Training", leave=False, total=total_step):
-            self.model.train()
-            self.current_args.step = i + 1
-            self.current_args.epoch = round(self.current_args.step * epoch_per_step, 2)
-            outputs = self.model.kernel(samples, targets)
-            self.optimizer.zero_grad()
-            outputs['loss'].backward()
-            
-            if self.args.max_norm > 0:
-                torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.args.max_norm)
-                self.optimizer.step()
-            
-            train_outputs = self.concat(train_outputs, outputs)
-            train_targets = torch.concat([train_targets, targets])
-            if self.current_args.step % self.args.log_step == 0:
-                self.log(train_outputs, train_targets, "train")
-                self.saveExp()
-                self.valid()
-                train_outputs = None
-                train_targets = torch.tensor([])
-            self.lr_scheduler.step()
-            # bar()
-            if self.current_args.step == total_step:
-                break
+        with alive_bar(total_step, title="experiment is progressing: ", ) as bar:
+            bar()
+            train_outputs = None
+            train_targets = torch.tensor([])
+            for i, (samples, targets) in enumerate(cycle(self.train_dataloader)):
+                self.model.train()
+                self.current_args.step = i + 1
+                self.current_args.epoch = round(self.current_args.step * epoch_per_step, 2)
+                outputs = self.model.kernel(samples, targets)
+                self.optimizer.zero_grad()
+                outputs['loss'].backward()
+                
+                if self.args.max_norm > 0:
+                    torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.args.max_norm)
+                    self.optimizer.step()
+                
+                train_outputs = self.concat(train_outputs, outputs)
+                train_targets = torch.concat([train_targets, targets])
+                if self.current_args.step % self.args.log_step == 0:
+                    self.log(train_outputs, train_targets, "train")
+                    self.saveExp()
+                    self.valid()
+                    train_outputs = None
+                    train_targets = torch.tensor([])
+                self.lr_scheduler.step()
+                bar()
+                if self.current_args.step == total_step:
+                    break
         swanlab.finish(self.swanlab)
                 
 
@@ -57,7 +57,7 @@ class Engine4Cla(EngineBase):
         self.model.eval()
         train_outputs = None
         train_targets = torch.tensor([])
-        for samples, targets in tqdm(self.valid_dataloader, desc="Validating", leave=False):
+        for samples, targets in self.valid_dataloader:
             outputs = self.model.kernel(samples, targets)
             train_outputs = self.concat(train_outputs, outputs)
             train_targets = torch.concat([train_targets, targets])
