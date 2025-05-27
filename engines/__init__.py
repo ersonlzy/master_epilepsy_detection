@@ -26,6 +26,7 @@ class EngineBase:
         self.current_args = args
         self.device = torch.device(args.device)
         self.model = registered_models[args.model](args)
+        print(self.args.__dict__)
         self.optimizer = registered_optimizers[self.args.optim](self.model.model.parameters(), lr=self.args.lr, weight_decay=self.args.weight_decay)
 
         if self.args.resume:
@@ -42,7 +43,7 @@ class EngineBase:
             project=self.project,
             experiment_name=self.args.experiment,
             config=self.args.__dict__,
-            
+
         )
 
         self.dataset = registered_datasets[self.args.dataset](args)

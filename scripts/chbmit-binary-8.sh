@@ -2,7 +2,7 @@
                 --device cuda \
                 --num_epochs 200 \
                 --batch_size 64 \
-                --weight_decay 0.8 \
+                --weight_decay 1 \
                 --lr 0.00005 \
                 --experiment chbmit-binary-8 \
                 --seq_len 1024 \
@@ -11,7 +11,7 @@
                 --k 0.9 \
                 --t 40 \
                 --d 4 \
-                --dropout 0.85 \
+                --dropout 0.99 \
                 --d_model 2048 \
                 --channel_independent False \
                 --num_classes 2 \
