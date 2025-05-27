@@ -23,7 +23,7 @@ class ModelBase(nn.Module):
         samples = samples.to(self.device)
         targets = targets.to(self.device)
         outputs = self.forward(samples)
-        print(outputs.shape, targets.shape)
+        print(outputs, targets)
         loss = self.criterion(outputs, targets)
         
         return {
