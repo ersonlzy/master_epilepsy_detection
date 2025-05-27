@@ -11,7 +11,7 @@
                 --k 0.9 \
                 --t 40 \
                 --d 4 \
-                --dropout 0.99 \
+                --dropout 0.9 \
                 --d_model 2048 \
                 --channel_independent False \
                 --num_classes 2 \

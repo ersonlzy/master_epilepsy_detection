@@ -134,7 +134,7 @@ class EngineBase:
             raise ValueError("Checkpoint not specified. Please provide a valid checkpoint to resume from.")
 
 registered_optimizers = {
-    "adamw": torch.optim.AdamW,
+    "adamw": torch.optim.Adam,
 }
 
 registered_schedulers = {
