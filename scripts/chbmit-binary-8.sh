@@ -1,5 +1,5 @@
  uv run train.py --engine cla \
-                --device mps \
+                --device cuda \
                 --num_epochs 200 \
                 --batch_size 64 \
                 --weight_decay 0.8 \
