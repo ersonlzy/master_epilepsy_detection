@@ -7,7 +7,7 @@ class CrossEntropyLoss(nn.Module):
     def __init__(self, args):
         super(CrossEntropyLoss, self).__init__()
         self.device = torch.device(args.device if torch.cuda.is_available() else "cpu")
-        self.criterion = nn.CrossEntropyLoss()
+        self.criterion = nn.CrossEntropyLoss(label_smoothing=args.epsilon)
 
     def forward(self, inputs, targets):
         return self.criterion(inputs, targets)
@@ -31,44 +31,69 @@ class CrossEntropyLoss(nn.Module):
 #         return focal_loss.mean()
     
 
+# class FocalLoss(nn.Module):
+#     def __init__(self, args):
+#         super().__init__()
+#         self.args = args
+#         self.gamma = args.gamma
+#         self.alpha = args.alpha
+#         if isinstance(args.alpha,(float,int)): 
+#             self.alpha = torch.tensor([args.alpha,1-args.alpha], device=torch.device(self.args.device))
+#         if isinstance(args.alpha,list): 
+#             self.alpha = torch.tensor(args.alpha, device=torch.device(self.args.device))
+#         self.size_average = True
+
+
+
+#     def forward(self, input, target):
+#         if input.dim()>2:
+#             input = input.view(input.size(0),input.size(1),-1)  # N,C,H,W => N,C,H*W
+#             input = input.transpose(1,2)    # N,C,H*W => N,H*W,C
+#             input = input.contiguous().view(-1,input.size(2))   # N,H*W,C => N*H*W,C
+#         target = target.view(-1,1)
+
+#         logpt = F.log_softmax(input)
+#         logpt = logpt.gather(1, target)
+#         logpt = logpt.view(-1)
+#         pt = Variable(logpt.data.exp())
+
+#         if self.alpha is not None:
+#             if self.alpha.type() != input.data.type():
+#                 self.alpha = self.alpha.type_as(input.data)
+#             at = self.alpha.gather(0,target.data.view(-1))
+#             logpt = logpt * Variable(at)
+
+#         loss = -1 * (1-pt) ** self.gamma * logpt
+#         if self.size_average: 
+#             return loss.mean()
+#         else: 
+#             return loss.sum()
+        
 class FocalLoss(nn.Module):
     def __init__(self, args):
         super().__init__()
-        self.args = args
         self.gamma = args.gamma
         self.alpha = args.alpha
-        if isinstance(args.alpha,(float,int)): 
-            self.alpha = torch.tensor([args.alpha,1-args.alpha], device=torch.device(self.args.device))
-        if isinstance(args.alpha,list): 
-            self.alpha = torch.tensor(args.alpha, device=torch.device(self.args.device))
-        self.size_average = True
 
-
-
-    def forward(self, input, target):
-        if input.dim()>2:
-            input = input.view(input.size(0),input.size(1),-1)  # N,C,H,W => N,C,H*W
-            input = input.transpose(1,2)    # N,C,H*W => N,H*W,C
-            input = input.contiguous().view(-1,input.size(2))   # N,H*W,C => N*H*W,C
-        target = target.view(-1,1)
-
-        logpt = F.log_softmax(input)
-        logpt = logpt.gather(1, target)
-        logpt = logpt.view(-1)
-        pt = Variable(logpt.data.exp())
+    def forward(self, inputs, targets):
+        log_probs = F.log_softmax(inputs, dim=1)
+        probs = torch.exp(log_probs)
+        targets = targets.view(-1, 1)
+        log_pt = log_probs.gather(1, targets).squeeze(1)
+        pt = probs.gather(1, targets).squeeze(1)
 
         if self.alpha is not None:
-            if self.alpha.type() != input.data.type():
-                self.alpha = self.alpha.type_as(input.data)
-            at = self.alpha.gather(0,target.data.view(-1))
-            logpt = logpt * Variable(at)
+            if isinstance(self.alpha, (float, int)):
+                alpha_t = torch.full_like(pt, self.alpha)
+            elif isinstance(self.alpha, (list, torch.Tensor)):
+                alpha = torch.tensor(self.alpha, device=inputs.device)
+                alpha_t = alpha[targets.squeeze()]
+            else:
+                raise TypeError("alpha must be float, list, or torch.Tensor")
+            log_pt = log_pt * alpha_t
 
-        loss = -1 * (1-pt) ** self.gamma * logpt
-        if self.size_average: 
-            return loss.mean()
-        else: 
-            return loss.sum()
-
+        loss = -((1 - pt) ** self.gamma) * log_pt
+        return loss.mean()
 
 def label_smooth(logits, targets, epsilon, num_classes):
     # 构造平滑标签，除了正确类别为 1-beta，其他类别为 beta/(num_classes-1)
@@ -76,7 +101,6 @@ def label_smooth(logits, targets, epsilon, num_classes):
     t[targets.unsqueeze(-1)] = 1 - epsilon
     # 计算平滑后的交叉熵，返回每个样本的损失
     return F.cross_entropy(logits.softmax(-1), t, reduction='none')
-
 
 class LabelSmoothingCrossEntropyLoss(nn.Module):
     def __init__(self, args):

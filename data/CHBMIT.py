@@ -131,14 +131,14 @@ class CHBMIT(Dataset):
                         "st": i,
                         "et": i + self.args.length,
                     })
-                    if label == 'preictal':
-                        for j in range(3):
-                            annos.append({
-                                "file": edf.file_name,
-                                "label": label,
-                                "st": i,
-                                "et": i + self.args.length,
-                            })
+                    # if label == 'preictal':
+                    #     for j in range(3):
+                    #         annos.append({
+                    #             "file": edf.file_name,
+                    #             "label": label,
+                    #             "st": i,
+                    #             "et": i + self.args.length,
+                    #         })
                 random.shuffle(annos)
                 t, v = train_test_split(annos, train_size=self.args.train_size)
                 train_annos.extend(t)
