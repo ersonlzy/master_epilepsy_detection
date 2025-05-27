@@ -3,7 +3,7 @@
                 --num_epochs 200 \
                 --batch_size 64 \
                 --weight_decay 0.8 \
-                --lr 0.0001 \
+                --lr 0.00005 \
                 --experiment chbmit-binary-8 \
                 --seq_len 1024 \
                 --num_features 23 \
