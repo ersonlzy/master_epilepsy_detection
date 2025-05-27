@@ -29,6 +29,7 @@
                 --alpha 0.5 \
                 --epsilon 0.05 \
                 --log_step 100 \
+                --root_path /root/autodl-tmp/datasets/chbmit \
 
 
                 
