@@ -23,14 +23,12 @@ class ModelBase(nn.Module):
         samples = samples.to(self.device)
         targets = targets.to(self.device)
         outputs = self.forward(samples)
-        loss = self.getLoss(outputs, targets)
+        print(outputs.shape, targets.shape)
+        loss = self.criterion(outputs, targets)
         
         return {
             "loss": loss,
             "outputs": outputs,
             'targets': targets,
         }
-
-    def getLoss(self, outputs, targets):
-        return self.criterion(outputs, targets)
     

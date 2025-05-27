@@ -17,8 +17,7 @@ class Metrics(nn.Module):
         if self.args.metric_type == "binary":
             pred_probas = pred_probas[:, 1]
         confmat = f.confusion_matrix(preds, trues, task = self.args.metric_type, num_classes=self.args.num_classes)
-        # prt = f.precision_recall_curve(pred_probas, trues, task = self.args.metric_type, num_classes=self.args.num_classes)
-        prts = self.getPRTS(pred_probas, trues, task = self.args.metric_type, num_classes=self.args.num_classes)
+        prts = self.getPRTS(pred_probas, trues)
         map = torch.mean(f.average_precision(pred_probas, trues, task = self.args.metric_type, num_classes=self.args.num_classes))
         recall = f.recall(preds, trues, task = self.args.metric_type, num_classes=self.args.num_classes)
         specificity = f.specificity(preds, trues, task = self.args.metric_type, num_classes=self.args.num_classes)
@@ -35,7 +34,7 @@ class Metrics(nn.Module):
                 "loss": loss,
                 }
     
-    def getPRTS(self, pred_probas, trues, task, num_classes):
+    def getPRTS(self, pred_probas, trues):
         precision_list = []
         recall_list = []
         th_list = []
