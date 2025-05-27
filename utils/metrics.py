@@ -24,7 +24,7 @@ class Metrics(nn.Module):
         specificity = f.specificity(preds, trues, task = self.args.metric_type, num_classes=self.args.num_classes)
         precision = f.precision(preds, trues, task = self.args.metric_type, num_classes=self.args.num_classes)
         accuracy = f.accuracy(preds, trues,  task = self.args.metric_type, num_classes=self.args.num_classes)    
-        loss = nn.functional.cross_entropy(pred_logits, trues)
+        loss = torch.tensor(outputs['loss']).mean().item()
         return {"confmat": confmat,
                 "map" : map,
                 "prts" : prts,  
