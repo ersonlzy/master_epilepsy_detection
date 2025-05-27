@@ -17,37 +17,39 @@ class Engine4Cla(EngineBase):
 
     def run(self):
         self.expReady()
-        total_step = len(self.train_dataloader) // self.args.batch_size * self.args.num_epochs
+        print(self.dataset.splitReport())
+        print(len(self.train_dataloader), len(self.valid_dataloader))
+        total_step = (len(self.train_dataloader) * self.args.num_epochs)
         epoch_per_step = self.args.num_epochs / total_step
-        # step_loss_list = []
         with alive_bar(total_step, title="experiment is progressing: ", ) as bar:
-            bar()
-            train_outputs = None
-            train_targets = torch.tensor([])
-            for i, (samples, targets) in enumerate(cycle(self.train_dataloader)):
-                self.model.train()
-                self.current_args.step = i + 1
-                self.current_args.epoch = round(self.current_args.step * epoch_per_step, 2)
-                outputs = self.model.kernel(samples, targets)
-                self.optimizer.zero_grad()
-                outputs['loss'].backward()
-                
-                if self.args.max_norm > 0:
-                    torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.args.max_norm)
-                    self.optimizer.step()
-                
-                train_outputs = self.concat(train_outputs, outputs)
-                train_targets = torch.concat([train_targets, targets])
-                if self.current_args.step % self.args.log_step == 0:
-                    self.log(train_outputs, train_targets, "train")
-                    self.saveExp()
-                    self.valid()
-                    train_outputs = None
-                    train_targets = torch.tensor([])
-                self.lr_scheduler.step()
-                bar()
-                if self.current_args.step == total_step:
-                    break
+            bar(self.current_args.step + 1)
+            try:
+                train_outputs = None
+                for samples, targets in cycle(self.train_dataloader):
+                    self.model.train()
+                    self.current_args.step += 1
+                    self.current_args.epoch = round(self.current_args.step * epoch_per_step, 2)
+                    outputs = self.model.kernel(samples, targets)
+                    self.optimizer.zero_grad()
+                    outputs['loss'].backward()
+                    
+                    if self.args.max_norm > 0:
+                        torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.args.max_norm)
+                        self.optimizer.step()
+                    
+                    train_outputs = self.concat(train_outputs, outputs)
+                    if self.current_args.step % self.args.log_step == 0:
+                        self.log(train_outputs, "train")
+                        self.saveExp()
+                        self.valid()
+                        train_outputs = None
+                    self.lr_scheduler.step()
+                    bar()
+                    if self.current_args.step == total_step:
+                        break
+            except KeyboardInterrupt:
+                print("KeyboardInterrupt: manually stopping training")
+                self.saveExp()
         swanlab.finish(self.swanlab)
                 
 
@@ -56,12 +58,12 @@ class Engine4Cla(EngineBase):
     def valid(self):
         self.model.eval()
         train_outputs = None
-        train_targets = torch.tensor([])
+        # train_targets = torch.tensor([], device=self.device)
         for samples, targets in self.valid_dataloader:
             outputs = self.model.kernel(samples, targets)
             train_outputs = self.concat(train_outputs, outputs)
-            train_targets = torch.concat([train_targets, targets])
-        self.log(train_outputs, train_targets, "valid")
+            # train_targets = torch.concat([train_targets, targets])
+        self.log(train_outputs, "valid")
 
 
     @torch.no_grad()
@@ -79,14 +81,13 @@ class Engine4Cla(EngineBase):
 
 
 
-    def log(self, outputs, targets, tag):
-        _log(swanlab, self.metrics, outputs, targets, tag, self.dataset.classes_list, self.current_args)
+    def log(self, outputs, tag):
+        _log(swanlab, self.metrics, outputs, tag, self.dataset.classes_list, self.current_args)
 
-
-def _log(logger, metric_holder, outputs, targets, tag, class_list, args):
-    metrics = metric_holder(outputs, targets)
+def _log(logger, metric_holder, outputs, tag, class_list, args):
+    metrics = metric_holder(outputs)
     confmat = metrics["confmat"]
-    logger.log({f"{tag}_Confusion Matrix": logger.Image(confmat_plot(confmat, class_list), caption="Confusion Matrix")})
+    logger.log({f"{tag}/Confusion Matrix": logger.Image(confmat_plot(confmat, class_list), caption="Confusion Matrix")})
     precision, recall, confidence, specificity = metrics["prts"]
     if args.metric_type == "binary":
         precision = [precision]
@@ -94,18 +95,17 @@ def _log(logger, metric_holder, outputs, targets, tag, class_list, args):
         confidence = [confidence]
         specificity = [specificity]
         class_list = [class_list[-1]]
-    logger.log({f"{tag}_loss": round(metrics["loss"].item(), 4), 
-                f"{tag}_mAP": round(metrics["map"].item(), 4),
-                f"{tag}_accuracy": round(metrics['accuracy'].item(), 4),
-                f"{tag}_recall": round(metrics["recall"].item(), 4),
-                f"{tag}_specificity": round(metrics["specificity"].item(), 4),
-                f"{tag}_precision": round(metrics["precision"].item(), 4),
-                "epoch": args.epoch}, print_to_console=True)
-    logger.log({f"{tag}_Precision-Recall Curve": logger.Image(precision_recall_plot(precision, recall, class_list), caption="Precision-Recall Curve")})
-    logger.log({f"{tag}_Precision-Confidence Curve": logger.Image(precision_confidence_plot(precision, confidence, class_list), caption="Precision-Confidence Curve")})
-    logger.log({f"{tag}_Recall-Confidence Curve": logger.Image(recall_confidence_plot(recall, confidence, class_list), caption="Recall-Confidence Curve")})
-    logger.log({f"{tag}_Specificity-Confidence Curve": logger.Image(specificity_confidence_plot(specificity, confidence, class_list), caption="Specificity-Confidence Curve")})
-    logger.log({f"{tag}_F1score-Confidence Curve": logger.Image(f1score_confidence_plot(precision, recall, confidence, class_list), caption="F1score-Confidence Curve")})
+    logger.log({f"{tag}/loss": round(metrics["loss"].item(), 4), 
+                f"{tag}/mAP": round(metrics["map"].item(), 4),
+                f"{tag}/accuracy": round(metrics['accuracy'].item(), 4),
+                f"{tag}/recall": round(metrics["recall"].item(), 4),
+                f"{tag}/specificity": round(metrics["specificity"].item(), 4),
+                f"{tag}/precision": round(metrics["precision"].item(), 4)}, print_to_console=True, step=args.step)
+    logger.log({f"{tag}/Precision-Recall Curve": logger.Image(precision_recall_plot(precision, recall, class_list), caption="Precision-Recall Curve")})
+    logger.log({f"{tag}/Precision-Confidence Curve": logger.Image(precision_confidence_plot(precision, confidence, class_list), caption="Precision-Confidence Curve")})
+    logger.log({f"{tag}/Recall-Confidence Curve": logger.Image(recall_confidence_plot(recall, confidence, class_list), caption="Recall-Confidence Curve")})
+    logger.log({f"{tag}/Specificity-Confidence Curve": logger.Image(specificity_confidence_plot(specificity, confidence, class_list), caption="Specificity-Confidence Curve")})
+    logger.log({f"{tag}/F1score-Confidence Curve": logger.Image(f1score_confidence_plot(precision, recall, confidence, class_list), caption="F1score-Confidence Curve")})
     
 
 

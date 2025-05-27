@@ -35,11 +35,14 @@ def get_parsing():
     parser.add_argument('--scheduler',    type=str,     default="coslr",      choices=list(registered_schedulers.keys()))
     parser.add_argument('--metric_type',  type=str,     default="binary",     choices=['binary', 'multiclass'])
     parser.add_argument('--num_classes',  type=int,     default=2)
-    parser.add_argument('--train_size',   type=float,   default=0.9)
+    parser.add_argument('--train_size',   type=float,   default=0.8)
     parser.add_argument('--log_step',     type=int,     default=10)
     parser.add_argument('--step',         type=int,     default=0)
     parser.add_argument('--epoch',        type=float,   default=0.0)
     parser.add_argument('--grad_cum_step',type=int,     default=1)
+    parser.add_argument('--num_saves',    type=int,     default=3)
+    parser.add_argument('--resume',       type=bool,    default=False)
+    parser.add_argument('--checkpoint',   type=str,     default='')
     
 
 
@@ -70,18 +73,19 @@ def get_parsing():
     # loss setting
     parser.add_argument('--epsilon',      type=float,   default=1e-8)
     parser.add_argument('--gamma',        type=float,   default=0.9)
-    parser.add_argument('--weight',       type=float,   default=0.5)
+    parser.add_argument('--alpha',       type=float,   default=0.5)
     
     # dataset setting
     parser.add_argument('--root_path',    type=str,     default="/Volumes/ersonlzy/datasets/chbmit/")
     parser.add_argument('--freq',         type=float,   default=256.0)
     parser.add_argument('--is_three',     type=bool,    default=False)
     parser.add_argument('--tag',          type=str,     default='train')
-    parser.add_argument('--tolerance',    type=float,    default=75)
+    parser.add_argument('--tolerance',    type=int,    default=75)
     parser.add_argument('--ts',           type=int,     default=20)
     parser.add_argument('--length',       type=int,     default=4)
     parser.add_argument('--num_workers',  type=int,     default=16)
     parser.add_argument('--shuffle',      type=bool,    default=True)
+    parser.add_argument('--recut',        type=bool,    default=True)
 
 
 

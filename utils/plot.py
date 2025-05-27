@@ -7,7 +7,7 @@ import numpy as np
 
 def confmat_plot(confmat, class_list):
     fig, ax = plt.subplots(figsize=(12,8)) 
-    ax = sns.heatmap(confmat, 
+    ax = sns.heatmap(confmat.detach().cpu().numpy(), 
                     cmap="YlGnBu", 
                     annot=True, 
                     fmt=".2f", 

@@ -8,8 +8,9 @@ class Metrics(nn.Module):
         self.args = args
     
     @torch.no_grad()
-    def forward(self, outputs, targets):
+    def forward(self, outputs):
         pred_logits = outputs['outputs']
+        targets = outputs['targets']
         pred_probas = torch.softmax(pred_logits, -1)
         preds = torch.argmax(pred_probas, -1)
         trues = targets.long()

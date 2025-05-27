@@ -5,7 +5,7 @@ from models.loss import *
 
 registered_losses = {
     "ce": CrossEntropyLoss,
-    "lr": FocalLoss,
+    "fl": FocalLoss,
     "lsce": LabelSmoothingCrossEntropyLoss,
 }
 
@@ -13,19 +13,22 @@ class ModelBase(nn.Module):
     def __init__(self, args):
         super(ModelBase, self).__init__()
         self.args = args
-        self.device = torch.device(args.device if torch.cuda.is_available() else "cpu")
+        self.device = torch.device(args.device)
         self.criterion = registered_losses[self.args.loss](args)
 
     def forward(self, x):
         raise NotImplementedError
 
     def kernel(self, samples, targets):
+        samples = samples.to(self.device)
+        targets = targets.to(self.device)
         outputs = self.forward(samples)
         loss = self.getLoss(outputs, targets)
         
         return {
             "loss": loss,
             "outputs": outputs,
+            'targets': targets,
         }
 
     def getLoss(self, outputs, targets):

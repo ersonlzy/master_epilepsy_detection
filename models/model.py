@@ -433,5 +433,6 @@ class DecompNet4ESD(ModelBase):
         super().__init__(args)
         self.model = Model(args)
 
+
     def forward(self, x):
         return self.model(x)

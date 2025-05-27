@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
+from torch.autograd import Variable
 
 class CrossEntropyLoss(nn.Module):
     def __init__(self, args):
@@ -14,21 +14,60 @@ class CrossEntropyLoss(nn.Module):
     
 
 
+# class FocalLoss(nn.Module):
+#     def __init__(self, args):
+#         super().__init__()
+#         self.args = args
+#         self.gamma = args.gamma  # 调节易分类样本的损失权重
+#         self.alpha = args.alpha  # 权重参数，通常用来平衡类别不平衡
+            
+#     def forward(self, logits, targets):
+#         # 使用标签平滑后计算交叉熵损失
+#         ce_loss_smoothing = label_smooth(logits, targets, self.args.epsilon, logits.shape[-1])
+#         # 计算概率 pt
+#         pt = torch.exp(- ce_loss_smoothing)
+#         # 计算 focal loss
+#         focal_loss = (self.alpha * (1 - pt)**self.gamma * ce_loss_smoothing)
+#         return focal_loss.mean()
+    
+
 class FocalLoss(nn.Module):
     def __init__(self, args):
         super().__init__()
         self.args = args
-        self.gamma = args.gamma  # 调节易分类样本的损失权重
-        self.weight = args.weight  # 权重参数，通常用来平衡类别不平衡
-            
-    def forward(self, logits, targets):
-        # 使用标签平滑后计算交叉熵损失
-        ce_loss_smoothing = label_smooth(logits, targets, self.args.epsilon, logits.shape[-1])
-        # 计算概率 pt
-        pt = torch.exp(- ce_loss_smoothing)
-        # 计算 focal loss
-        focal_loss = (self.alpha * (1 - pt)**self.gamma * ce_loss_smoothing)
-        return focal_loss.mean()
+        self.gamma = args.gamma
+        self.alpha = args.alpha
+        if isinstance(args.alpha,(float,int)): 
+            self.alpha = torch.tensor([args.alpha,1-args.alpha], device=torch.device(self.args.device))
+        if isinstance(args.alpha,list): 
+            self.alpha = torch.tensor(args.alpha, device=torch.device(self.args.device))
+        self.size_average = True
+
+
+
+    def forward(self, input, target):
+        if input.dim()>2:
+            input = input.view(input.size(0),input.size(1),-1)  # N,C,H,W => N,C,H*W
+            input = input.transpose(1,2)    # N,C,H*W => N,H*W,C
+            input = input.contiguous().view(-1,input.size(2))   # N,H*W,C => N*H*W,C
+        target = target.view(-1,1)
+
+        logpt = F.log_softmax(input)
+        logpt = logpt.gather(1, target)
+        logpt = logpt.view(-1)
+        pt = Variable(logpt.data.exp())
+
+        if self.alpha is not None:
+            if self.alpha.type() != input.data.type():
+                self.alpha = self.alpha.type_as(input.data)
+            at = self.alpha.gather(0,target.data.view(-1))
+            logpt = logpt * Variable(at)
+
+        loss = -1 * (1-pt) ** self.gamma * logpt
+        if self.size_average: 
+            return loss.mean()
+        else: 
+            return loss.sum()
 
 
 def label_smooth(logits, targets, epsilon, num_classes):

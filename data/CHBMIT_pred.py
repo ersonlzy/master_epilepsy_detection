@@ -9,7 +9,7 @@ from tqdm import tqdm
 from sklearn.model_selection import train_test_split
 from argparse import Namespace
 
-from data.CHBMIT import Event, EDF
+from data.CHBMIT_old import Event, EDF
 import random
 import prettytable as pt
 
@@ -73,7 +73,7 @@ class CHBMIT(Dataset):
     
     def __init__(self, args):
         super().__init__()
-        self.args = Namespace(**args)
+        self.args = args
         if self.args.is_three:
             self.classes_list = self.classes_three_list
         else:
@@ -213,5 +213,5 @@ class CHBMIT(Dataset):
     def collateFn4Cla(self, data):
         samples, labels = zip(*data)
         samples = torch.stack(samples, 0)
-        labels = torch.stack(labels, 0)
-        return samples, labels, None
+        labels = torch.concat(labels, 0)
+        return samples, labels
