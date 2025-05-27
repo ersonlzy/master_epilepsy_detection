@@ -23,12 +23,11 @@ class ModelBase(nn.Module):
         samples = samples.to(self.device)
         targets = targets.to(self.device)
         outputs = self.forward(samples)
-        print(outputs, targets)
         loss = self.criterion(outputs, targets)
         
         return {
             "loss": loss,
-            "outputs": outputs,
+            "outputs": outputs.detach(),
             'targets': targets,
         }
     
