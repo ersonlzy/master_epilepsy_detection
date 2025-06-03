@@ -8,9 +8,8 @@ import yaml
 from tqdm import tqdm
 from sklearn.model_selection import train_test_split
 from argparse import Namespace
-
-from data.CHBMIT_old import Event, EDF
 import random
+from data.CHBMIT_old import Event, EDF
 import prettytable as pt
 
 warnings.filterwarnings('ignore')
@@ -67,13 +66,15 @@ class CHBMIT(Dataset):
     classes_binary_list = ['normal', 'seizure']
     classes_three_list = ['normal', 'seizure', 'preictal']
     
-    used_patients = ['chb01-summary.txt', 'chb03-summary.txt', 'chb07-summary.txt', 'chb09-summary.txt', 
-                     'chb10-summary.txt', 'chb20-summary.txt', 'chb21-summary.txt', 'chb22-summary.txt']
+    # used_patients = ['chb01-summary.txt', 'chb03-summary.txt', 'chb07-summary.txt', 'chb09-summary.txt', 
+    #                  'chb10-summary.txt', 'chb20-summary.txt', 'chb21-summary.txt', 'chb22-summary.txt']
     
+    used_patients = ['chb03-summary.txt']
     
     def __init__(self, args):
         super().__init__()
         self.args = args
+        self.args.is_three = False
         if self.args.is_three:
             self.classes_list = self.classes_three_list
         else:
@@ -100,54 +101,63 @@ class CHBMIT(Dataset):
                 continue
             edfs.extend(parse(os.path.join(summaries_path, summary)))
         for edf in tqdm(edfs, desc="edfs is processing"):
+            annos_dict = {
+                "preictal": [],
+                "normal": [],
+                "seizure": []
+            } if self.args.is_three else {
+                "seizure": [],
+                "normal": [],
+            }
+            print(annos_dict)
             if len(edf) == 0:
                 continue
             # raw = mne.io.read_raw_edf(os.path.join(recordings_path, edf.file_name))
             raw = mne.io.read_raw_edf(os.path.join(recordings_path, edf.file_name), verbose=False)
-            labeled_sample = torch.zeros(raw.get_data().shape[-1])
+            labeled_sample = torch.full((1, raw.get_data().shape[-1]), -1).reshape(raw.get_data().shape[-1])
             for event in edf.events:
                 st, et = event.start, event.end
                 labeled_sample[int(st*self.args.freq): int(et*self.args.freq)] = 1
-            for event in edf.events:
-                st, et = event.start, event.end
-                annos, t, v = [], [], []
-                for i in range(max(0, st-self.args.tolerance), et): # tolerance = 90s, 发病前20s前为正常状态，发病前20s内为预发作状态
-                    percent = torch.mean((labeled_sample[int(i * self.args.freq): int((i + 4) * self.args.freq)] == 1).float()).item()
-                    
-                    if i < max(0, st - self.args.ts) and percent == 0:
-                        label = 'normal'
-                    elif percent < 0.1:
-                        label = 'preictal'
-                        if not self.args.is_three:
-                            continue
-                    elif percent >= 0.1:
-                        label = 'seizure'
-                    else:
-                        raise ValueError
-                        
-                    annos.append({
-                        "file": edf.file_name,
-                        "label": label,
-                        "st": i,
-                        "et": i + self.args.length,
-                    })
-                    # if label == 'preictal':
-                    #     for j in range(3):
-                    #         annos.append({
-                    #             "file": edf.file_name,
-                    #             "label": label,
-                    #             "st": i,
-                    #             "et": i + self.args.length,
-                    #         })
-                random.shuffle(annos)
-                t, v = train_test_split(annos, train_size=self.args.train_size)
-                train_annos.extend(t)
-                valid_annos.extend(v)
+                labeled_sample[int((st - self.args.ts ) * self.args.freq): int(st*self.args.freq)] = 0
+            annos, t, v = [], [], []
+            for i in range(0, labeled_sample.shape[-1] // 256 - 4):
+                seizure_percent = torch.mean((labeled_sample[int(i * self.args.freq): int((i + 4) * self.args.freq)] == 1).float()).item()
+                normal_percent = torch.mean((labeled_sample[int(i * self.args.freq): int((i + 4) * self.args.freq)] == -1).float()).item()
+                if seizure_percent >= 0.5:
+                    label = "seizure"
+                elif normal_percent >= 0.5:
+                    label = "normal"
+                else:
+                    label = "preictal"
+                
+                if not self.args.is_three and label=="preictal":
+                    print(i)
+                    continue
+                annos_dict[label].append({
+                    "file": edf.file_name,
+                    "label": label,
+                    "st": i,
+                    "et": i + self.args.length, 
+                })
+            annos = self.balance(annos_dict)
+
+            random.shuffle(annos)
+            t, v = train_test_split(annos, train_size=self.args.train_size)
+            train_annos.extend(t)
+            valid_annos.extend(v)
         print('Data has been annotated entirely')
         return train_annos, valid_annos
             
         
-    
+    def balance(self, annos_dict:dict):
+        max_num = max([len(v) for v in annos_dict.values()])
+        res = []
+        for k, v in annos_dict.items():
+            res.extend(annos_dict[k] * (max_num // len(annos_dict[k])))
+        return res
+
+
+
     def readData(self):
         self.train_dataset, self.valid_dataset  =  self.preprocessing()
         self.splitedStatistic = {}

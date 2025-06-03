@@ -95,3 +95,39 @@ def f1score_confidence_plot(precision, recall, confidence, class_list):
     plt.xlim(0,1)
     plt.ylim(0,1)
     return fig
+
+def decomp_out_plot(decomp_out):
+    n, d, l = decomp_out.shape
+    decomp_out = decomp_out.detach().cpu().numpy()
+    fig, ax = plt.subplots(n, d,constrained_layout=True, figsize=(20,9))
+    for i in range(n):
+        for j in range(d):
+            sns.lineplot(decomp_out[j, i, :], ax=ax[j, i])
+    return fig
+
+
+def diff_out_plot(diff_out):
+    diff_out = diff_out[0].detach().cpu().numpy()
+    d, o, l = diff_out.shape
+    fig, ax = plt.subplots(o, d, constrained_layout=True, figsize=(20,9))
+    for i in range(d):
+        for j in range(o):
+            sns.lineplot(diff_out[j, i, :], ax=ax[j, i])
+    return fig
+
+
+def mixer_out_plot(mixer_out):
+    n, d, l = mixer_out.shape
+    mixer_out = mixer_out.detach().cpu().numpy()
+    mixer_out = mixer_out.reshape(n * d, l)
+    fig, ax = plt.subplots(1, 1, constrained_layout=True, figsize=(7,3))
+    sns.heatmap(mixer_out,  ax=ax)
+    return fig
+
+
+def feats_plot(feats):
+    feats = feats.detach().cpu().numpy()
+    fig, ax = plt.subplots(1, 1, constrained_layout=True, figsize=(7,3))
+    sns.heatmap(feats,  ax=ax)
+    return fig
+

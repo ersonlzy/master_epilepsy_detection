@@ -1,9 +1,9 @@
  uv run train.py --engine cla \
-                --device cuda \
+                --device mps \
                 --num_epochs 200 \
                 --batch_size 64 \
                 --weight_decay 0 \
-                --lr 0.0001 \
+                --lr 0.001 \
                 --experiment chbmit-binary-8 \
                 --seq_len 1024 \
                 --num_features 23 \
@@ -20,16 +20,16 @@
                 --tolerance 75 \
                 --recut True \
                 --freq 256 \
-                --is_three False \
-                --ts 0 \
+                --is_three Fasle \
+                --ts 20 \
                 --tag train \
                 --length 4 \
-                --loss ce \
-                --gamma 3 \
+                --loss fl \
+                --gamma 2 \
                 --alpha 0.5 \
                 --epsilon 0.05 \
-                --log_step 100 \
-                --root_path /root/autodl-tmp/datasets/chbmit \
+                --log_step 20 \
+                --root_path /Volumes/ersonlzy/datasets/chbmit \
 
 
                 

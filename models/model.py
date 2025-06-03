@@ -294,16 +294,23 @@ class Model(nn.Module):
     
     def classify(self, input):
         out, m, std = self.__decompEmbedding(input)  # B, N, D, L
-        out = out * std + m
-        out = self.__diffEmbedding(out)      # B, N, D, O, L
-        feats = self.Mixer(out)
+        decomp_out = out * std + m
+        diff_out = self.__diffEmbedding(decomp_out)      # B, N, D, O, L
+        Mixer_out = self.Mixer(diff_out)
         # print(feats.shape)
-        feats = self.ln(feats)
-        feats = torch.sum(feats, dim=1)
-        out = self.classifyHeader(torch.flatten(feats, 1))
+        Mixer_out = self.ln(Mixer_out)
+        feats = torch.sum(Mixer_out, dim=1)
+        out = self.classifyHeader(torch.flatten(feats, 1)) 
         # print(out.shape)
         # out = torch.sum(out, dim=1)
-        return out
+        # return out
+        return {
+            "outputs": out,   # B, c
+            # "decomp_out": decomp_out, # B, N, D, L
+            # "diff_out": diff_out, # B, N, D, O, L
+            # "mixer_out": Mixer_out.detach(), # B, N, D, L
+            # "feats": feats, # B, D, L
+        }
     
     
     def abnormalDetect(self, input):
@@ -436,3 +443,16 @@ class DecompNet4ESD(ModelBase):
 
     def forward(self, x):
         return self.model(x)
+    
+    def kernel(self, samples, targets):
+        samples = samples.to(self.device)
+        targets = targets.to(self.device)
+        outputs_dict = self.forward(samples)
+        loss = self.criterion(outputs_dict['outputs'], targets)
+        outputs_dict.update({"loss": loss, "targets": targets})
+        # return {
+        #     "loss": loss,
+        #     "outputs": outputs.detach(),
+        #     'targets': targets,
+        # }
+        return outputs_dict

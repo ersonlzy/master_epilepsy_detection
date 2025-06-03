@@ -74,9 +74,9 @@ class Engine4Cla(EngineBase):
         else:
             for key, value in new.items():
                 if key == "loss":
-                    old[key].append(value)
+                    old[key].append(value.detach())
                 else:
-                    old[key] = torch.concat([old[key], value], 0)
+                    old[key] = torch.concat([old[key], value.detach()], 0)
         return old
 
 
@@ -84,6 +84,8 @@ class Engine4Cla(EngineBase):
     def log(self, outputs, tag):
         _log(swanlab, self.metrics, outputs, tag, self.dataset.classes_list, self.current_args)
 
+
+@torch.no_grad()
 def _log(logger, metric_holder, outputs, tag, class_list, args):
     metrics = metric_holder(outputs)
     confmat = metrics["confmat"]
@@ -106,6 +108,19 @@ def _log(logger, metric_holder, outputs, tag, class_list, args):
     logger.log({f"{tag}/Recall-Confidence Curve": logger.Image(recall_confidence_plot(recall, confidence, class_list), caption="Recall-Confidence Curve")})
     logger.log({f"{tag}/Specificity-Confidence Curve": logger.Image(specificity_confidence_plot(specificity, confidence, class_list), caption="Specificity-Confidence Curve")})
     logger.log({f"{tag}/F1score-Confidence Curve": logger.Image(f1score_confidence_plot(precision, recall, confidence, class_list), caption="F1score-Confidence Curve")})
+    # loss = torch.nn.functional.cross_entropy(outputs["outputs"], outputs['targets'], reduction="none")
+    # r = torch.min(loss, 0)
+    # _, min_index = r
+    # decomp_out = outputs["decomp_out"][min_index]
+    # diff_out = outputs["diff_out"][min_index]
+    # mixer_out = outputs["mixer_out"][min_index]
+    # feats = outputs["feats"]
+    # logger.log({f"{tag}/decomp_out": logger.Image(decomp_out_plot(decomp_out), caption="decomp_out")})
+    # logger.log({f"{tag}/diff_out": logger.Image(diff_out_plot(diff_out), caption="diff_out")})
+    # logger.log({f"{tag}/mixer_out": logger.Image(mixer_out_plot(mixer_out), caption="mixer_out")})
+    # logger.log({f"{tag}/feats": logger.Image(feats_plot(feats), caption="feats")})
+
+
     
 
 
