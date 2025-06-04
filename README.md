@@ -1,3 +1,5 @@
+[![](https://raw.githubusercontent.com/SwanHubX/assets/main/badge1.svg)](https://swanlab.cn/@ersonlzy/master_epilepsy_detection/overview)
+
 # Deep Learning Based Research of Epileptic EEG Signal
 
 # About this repository
