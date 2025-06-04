@@ -10,7 +10,7 @@ from tqdm import tqdm
 
 
 class Engine4Cla(EngineBase):
-    project = "classification"
+    project = "master_epilepsy_detection"
     def __init__(self, args):
         super().__init__(args)
     
@@ -91,23 +91,23 @@ def _log(logger, metric_holder, outputs, tag, class_list, args):
     confmat = metrics["confmat"]
     logger.log({f"{tag}/Confusion Matrix": logger.Image(confmat_plot(confmat, class_list), caption="Confusion Matrix")})
     precision, recall, confidence, specificity = metrics["prts"]
-    if args.metric_type == "binary":
-        precision = [precision]
-        recall = [recall]
-        confidence = [confidence]
-        specificity = [specificity]
-        class_list = [class_list[-1]]
+    # if args.metric_type == "binary":
+    precision = [precision]
+    recall = [recall]
+    confidence = [confidence]
+    specificity = [specificity]
+    class_list = [class_list[-1]]
     logger.log({f"{tag}/loss": round(metrics["loss"].item(), 4), 
                 f"{tag}/mAP": round(metrics["map"].item(), 4),
                 f"{tag}/accuracy": round(metrics['accuracy'].item(), 4),
                 f"{tag}/recall": round(metrics["recall"].item(), 4),
                 f"{tag}/specificity": round(metrics["specificity"].item(), 4),
                 f"{tag}/precision": round(metrics["precision"].item(), 4)}, print_to_console=True, step=args.step)
-    logger.log({f"{tag}/Precision-Recall Curve": logger.Image(precision_recall_plot(precision, recall, class_list), caption="Precision-Recall Curve")})
-    logger.log({f"{tag}/Precision-Confidence Curve": logger.Image(precision_confidence_plot(precision, confidence, class_list), caption="Precision-Confidence Curve")})
-    logger.log({f"{tag}/Recall-Confidence Curve": logger.Image(recall_confidence_plot(recall, confidence, class_list), caption="Recall-Confidence Curve")})
-    logger.log({f"{tag}/Specificity-Confidence Curve": logger.Image(specificity_confidence_plot(specificity, confidence, class_list), caption="Specificity-Confidence Curve")})
-    logger.log({f"{tag}/F1score-Confidence Curve": logger.Image(f1score_confidence_plot(precision, recall, confidence, class_list), caption="F1score-Confidence Curve")})
+    # logger.log({f"{tag}/Precision-Recall Curve": logger.Image(precision_recall_plot(precision, recall, class_list), caption="Precision-Recall Curve")})
+    # logger.log({f"{tag}/Precision-Confidence Curve": logger.Image(precision_confidence_plot(precision, confidence, class_list), caption="Precision-Confidence Curve")})
+    # logger.log({f"{tag}/Recall-Confidence Curve": logger.Image(recall_confidence_plot(recall, confidence, class_list), caption="Recall-Confidence Curve")})
+    # logger.log({f"{tag}/Specificity-Confidence Curve": logger.Image(specificity_confidence_plot(specificity, confidence, class_list), caption="Specificity-Confidence Curve")})
+    # logger.log({f"{tag}/F1score-Confidence Curve": logger.Image(f1score_confidence_plot(precision, recall, confidence, class_list), caption="F1score-Confidence Curve")})
     # loss = torch.nn.functional.cross_entropy(outputs["outputs"], outputs['targets'], reduction="none")
     # r = torch.min(loss, 0)
     # _, min_index = r

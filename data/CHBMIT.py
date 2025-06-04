@@ -74,7 +74,7 @@ class CHBMIT(Dataset):
     def __init__(self, args):
         super().__init__()
         self.args = args
-        self.args.is_three = False
+        # self.args.is_three = False
         if self.args.is_three:
             self.classes_list = self.classes_three_list
         else:
@@ -109,7 +109,7 @@ class CHBMIT(Dataset):
                 "seizure": [],
                 "normal": [],
             }
-            print(annos_dict)
+
             if len(edf) == 0:
                 continue
             # raw = mne.io.read_raw_edf(os.path.join(recordings_path, edf.file_name))
@@ -131,7 +131,6 @@ class CHBMIT(Dataset):
                     label = "preictal"
                 
                 if not self.args.is_three and label=="preictal":
-                    print(i)
                     continue
                 annos_dict[label].append({
                     "file": edf.file_name,

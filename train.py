@@ -80,12 +80,13 @@ def get_parsing():
     parser.add_argument('--freq',         type=float,   default=256.0)
     parser.add_argument('--is_three',     type=bool,    default=False)
     parser.add_argument('--tag',          type=str,     default='train')
-    parser.add_argument('--tolerance',    type=int,    default=75)
+    parser.add_argument('--tolerance',    type=int,     default=75)
     parser.add_argument('--ts',           type=int,     default=20)
     parser.add_argument('--length',       type=int,     default=4)
     parser.add_argument('--num_workers',  type=int,     default=16)
     parser.add_argument('--shuffle',      type=bool,    default=True)
     parser.add_argument('--recut',        type=bool,    default=True)
+    parser.add_argument('--datasets_task',type=int,     default=0)
 
 
 

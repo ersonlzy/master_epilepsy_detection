@@ -16,6 +16,7 @@ class Metrics(nn.Module):
         trues = targets.long()
         if self.args.metric_type == "binary":
             pred_probas = pred_probas[:, 1]
+        # print(preds.unique(), trues.unique(), self.args.num_classes)
         confmat = f.confusion_matrix(preds, trues, task = self.args.metric_type, num_classes=self.args.num_classes)
         prts = self.getPRTS(pred_probas, trues)
         map = torch.mean(f.average_precision(pred_probas, trues, task = self.args.metric_type, num_classes=self.args.num_classes))
