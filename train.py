@@ -69,6 +69,8 @@ def get_parsing():
     parser.add_argument('--d_model',      type=int,     default=1024)
     parser.add_argument('--channel_independent',      type=bool,     default=False)
     parser.add_argument('--task',         type=int,     default=2)
+    parser.add_argument('--window',       type=int,     default=10)
+    parser.add_argument('--resolution',   type=float,   default=0.5)
 
     # loss setting
     parser.add_argument('--epsilon',      type=float,   default=1e-8)

@@ -58,11 +58,9 @@ class Engine4Cla(EngineBase):
     def valid(self):
         self.model.eval()
         train_outputs = None
-        # train_targets = torch.tensor([], device=self.device)
         for samples, targets in self.valid_dataloader:
             outputs = self.model.kernel(samples, targets)
             train_outputs = self.concat(train_outputs, outputs)
-            # train_targets = torch.concat([train_targets, targets])
         self.log(train_outputs, "valid")
 
 
@@ -99,6 +97,7 @@ def _log(logger, metric_holder, outputs, tag, class_list, args):
     class_list = [class_list[-1]]
     logger.log({f"{tag}/loss": round(metrics["loss"].item(), 4), 
                 f"{tag}/mAP": round(metrics["map"].item(), 4),
+                f"{tag}/auc": round(metrics["auc"].item(), 4),
                 f"{tag}/accuracy": round(metrics['accuracy'].item(), 4),
                 f"{tag}/recall": round(metrics["recall"].item(), 4),
                 f"{tag}/specificity": round(metrics["specificity"].item(), 4),

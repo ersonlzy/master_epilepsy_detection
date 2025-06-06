@@ -7,7 +7,6 @@ from models import *
 from data import registered_datasets
 from copy import deepcopy
 from utils import Metrics
-from models.model import DecompNet4ESD
 import datetime
 import yaml
 from argparse import Namespace
@@ -142,9 +141,14 @@ registered_schedulers = {
 }
 
 
+from models.model import DecompNet4ESD
+from models.modelv1 import DecompNet4SEDV1
+
+
 registered_models = {
     "base": ModelBase,
     "esd": DecompNet4ESD,
+    "esdv1": DecompNet4SEDV1,
 }
 
 

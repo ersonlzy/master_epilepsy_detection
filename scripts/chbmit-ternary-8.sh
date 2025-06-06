@@ -4,7 +4,7 @@
                 --batch_size 64 \
                 --weight_decay 0.0 \
                 --lr 0.001 \
-                --experiment chbmit-three-8 \
+                --experiment chbmit-ternary-8 \
                 --seq_len 1024 \
                 --num_features 23 \
                 --diff_order 5 \
@@ -31,6 +31,7 @@
                 --log_step 20 \
                 --root_path /Volumes/ersonlzy/datasets/chbmit \
                 --metric_type multiclass \
+                --model esdv1
 
 
                 

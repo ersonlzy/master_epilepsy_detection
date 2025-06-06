@@ -32,6 +32,7 @@
                 --root_path /Volumes/ersonlzy/datasets/bonn \
                 --datasets_task 3 \
                 --metric_type multiclass \
+                --model esdv1
 
 
                 

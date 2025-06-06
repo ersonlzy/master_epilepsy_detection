@@ -2,7 +2,7 @@
                 --device mps \
                 --num_epochs 200 \
                 --batch_size 64 \
-                --weight_decay 0.08 \
+                --weight_decay 0 \
                 --lr 0.001 \
                 --experiment chbmit-binary-8 \
                 --seq_len 1024 \
@@ -30,6 +30,7 @@
                 --epsilon 0.05 \
                 --log_step 20 \
                 --root_path /Volumes/ersonlzy/datasets/chbmit \
+                --model esdv1
 
 
                 

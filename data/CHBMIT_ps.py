@@ -48,10 +48,6 @@ def parse(summary_path):
 
 
 class CHBMIT_ps(Dataset):
-    
-    
-    # feat_cols = ['FP1-F7', 'F7-T7', 'T7-P7', 'P7-O1', 'FP1-F3', 'F3-C3', 'C3-P3', 'P3-O1', 'FP2-F4', 'F4-C4', 'C4-P4', 
-    #              'P4-O2', 'FP2-F8', 'F8-T8', 'T8-P8', 'P8-O2', 'FZ-CZ', 'CZ-PZ']
     feat_cols = ['FP1-F7', 'F7-T7', 'T7-P7', 'P7-O1', 'FP1-F3', 'F3-C3', 'C3-P3', 'P3-O1', 'FP2-F4', 'F4-C4', 'C4-P4', 
                  'P4-O2', 'FP2-F8', 'F8-T8', 'T8-P8-0', 'P8-O2', 'FZ-CZ', 'CZ-PZ', 'P7-T7', 'T7-FT9', 'FT9-FT10', 
                  'FT10-T8', 'T8-P8-1']
@@ -63,7 +59,7 @@ class CHBMIT_ps(Dataset):
     }
     
     classes_binary_list = ['normal', 'seizure']
-    classes_three_list = ['normal', 'seizure', 'preictal']
+    classes_ternary_list = ['normal', 'seizure', 'preictal']
     
     used_patients = ['chb01-summary.txt', 'chb03-summary.txt', 'chb07-summary.txt', 'chb09-summary.txt', 
                      'chb10-summary.txt', 'chb20-summary.txt', 'chb21-summary.txt', 'chb22-summary.txt']
@@ -75,7 +71,7 @@ class CHBMIT_ps(Dataset):
         super().__init__()
         self.args = Namespace(**args)
         if self.args.is_three:
-            self.classes_list = self.classes_three_list
+            self.classes_list = self.classes_ternary_list
         else:
             self.classes_list = self.classes_binary_list
         self.readData() 
@@ -145,7 +141,6 @@ class CHBMIT_ps(Dataset):
             self.preprocessing()
         with open(os.path.join(self.args.root_path, f'annotations4{self.args.is_three}4LOOCV.yaml'), 'r', encoding='utf-8') as f:
             self.annos = list(yaml.load_all(f.read(), Loader=yaml.FullLoader))[0]
-        
         
         
     def update(self, tag, idx):
@@ -221,10 +216,6 @@ class CHBMIT_ps(Dataset):
         raw = mne.io.read_raw_edf(os.path.join(self.args.root_path, 'recordings', file_name), verbose=False)
         cutted_edf = raw.crop(st, et, include_tmax=False, verbose=False)
         sample_df = cutted_edf.load_data(verbose=False).to_data_frame()
-        # print(sample_df.columns)
-        # for col in self.feat_cols:
-        #     if col not in sample_df.columns.values.tolist():
-        #         sample_df.insert(sample_df.shape[1], col, 0)
         sample = sample_df[self.feat_cols].values.transpose()
         
         return torch.tensor(sample, dtype=torch.float32), torch.tensor([label]).long()
@@ -233,4 +224,4 @@ class CHBMIT_ps(Dataset):
         samples, labels = zip(*data)
         samples = torch.stack(samples, 0)
         labels = torch.stack(labels, 0)
-        return samples, labels, None
+        return samples, labels

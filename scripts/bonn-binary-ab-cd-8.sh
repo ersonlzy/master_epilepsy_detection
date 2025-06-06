@@ -31,6 +31,7 @@
                 --log_step 20 \
                 --root_path /Volumes/ersonlzy/datasets/bonn \
                 --datasets_task 2 \
+                --model esdv1
 
 
                 

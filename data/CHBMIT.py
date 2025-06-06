@@ -112,7 +112,6 @@ class CHBMIT(Dataset):
 
             if len(edf) == 0:
                 continue
-            # raw = mne.io.read_raw_edf(os.path.join(recordings_path, edf.file_name))
             raw = mne.io.read_raw_edf(os.path.join(recordings_path, edf.file_name), verbose=False)
             labeled_sample = torch.full((1, raw.get_data().shape[-1]), -1).reshape(raw.get_data().shape[-1])
             for event in edf.events:
@@ -131,7 +130,7 @@ class CHBMIT(Dataset):
                     label = "preictal"
                 
                 if not self.args.is_three and label=="preictal":
-                    continue
+                    label = "normal"
                 annos_dict[label].append({
                     "file": edf.file_name,
                     "label": label,
@@ -154,8 +153,6 @@ class CHBMIT(Dataset):
         for k, v in annos_dict.items():
             res.extend(annos_dict[k] * (max_num // len(annos_dict[k])))
         return res
-
-
 
     def readData(self):
         self.train_dataset, self.valid_dataset  =  self.preprocessing()
