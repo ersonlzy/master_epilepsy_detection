@@ -160,6 +160,7 @@ class _DecompNet4SEDV1(nn.Module):
         outputs = self.apply_headers[self.args.task](feats)
         return {
             "outputs": outputs,
+            "feats": feats,
         }
     
 
