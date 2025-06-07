@@ -3,15 +3,15 @@
                 --num_epochs 200 \
                 --batch_size 64 \
                 --weight_decay 0.0 \
-                --lr 0.001 \
+                --lr 0.0005 \
                 --experiment bonn-binary-ab-cd-8 \
                 --seq_len 512 \
                 --num_features 1 \
                 --diff_order 5 \
                 --k 0.9 \
                 --t 25 \
-                --d 5 \
-                --dropout 0.5 \
+                --d 4 \
+                --dropout 0.8 \
                 --d_model 1024 \
                 --channel_independent True \
                 --num_classes 2 \
@@ -27,7 +27,7 @@
                 --loss fl \
                 --gamma 2 \
                 --alpha 0.5 \
-                --epsilon 0.05 \
+                --epsilon 0.0 \
                 --log_step 20 \
                 --root_path /Volumes/ersonlzy/datasets/bonn \
                 --datasets_task 2 \

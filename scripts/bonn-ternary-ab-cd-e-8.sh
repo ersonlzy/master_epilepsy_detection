@@ -11,7 +11,7 @@
                 --k 0.9 \
                 --t 25 \
                 --d 5 \
-                --dropout 0.5 \
+                --dropout 0.2 \
                 --d_model 1024 \
                 --channel_independent True \
                 --num_classes 3 \
@@ -32,7 +32,7 @@
                 --root_path /Volumes/ersonlzy/datasets/bonn \
                 --datasets_task 3 \
                 --metric_type multiclass \
-                --model esdv1
+                --model esdv1 \
 
 
                 

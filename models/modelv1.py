@@ -123,10 +123,6 @@ class NLMDFE(nn.Module):
     expansion = 2
     def __init__(self, length, num_mods, num_channel, dropout):
         super().__init__()
-        self.net = nn.Sequential(
-            ResFFN(length, length, self.expansion * length, dropout),
-            ResFFN(num_mods, num_mods, self.expansion * num_mods, dropout),
-        )
         self.TM = ResFFN(length, length, self.expansion * length, dropout)
         self.MM = ResFFN(num_mods, num_mods, self.expansion * num_mods, dropout)
         self.CM = ChannelMixer(num_channel, num_channel, self.expansion * num_channel)
