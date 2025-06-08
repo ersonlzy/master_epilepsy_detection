@@ -1,6 +1,6 @@
  uv run train.py --engine cla \
                 --device mps \
-                --num_epochs 200 \
+                --num_epochs 10 \
                 --batch_size 64 \
                 --weight_decay 0.0 \
                 --lr 0.001 \
