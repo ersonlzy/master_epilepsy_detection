@@ -128,7 +128,6 @@ class CHBMIT(Dataset):
                     label = "normal"
                 else:
                     label = "preictal"
-                
                 if not self.args.is_three and label=="preictal":
                     label = "normal"
                 annos_dict[label].append({
@@ -148,7 +147,7 @@ class CHBMIT(Dataset):
             
         
     def balance(self, annos_dict:dict):
-        max_num = min([len(v) for v in annos_dict.values()])
+        max_num = max([len(v) for v in annos_dict.values()])
         res = []
         for k, v in annos_dict.items():
             res.extend(annos_dict[k] * (max_num // len(annos_dict[k])))

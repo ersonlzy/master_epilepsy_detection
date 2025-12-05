@@ -175,3 +175,7 @@ cython_debug/
 
 notebooks/
 runs/
+
+
+# macOS file storage
+.DS_Store

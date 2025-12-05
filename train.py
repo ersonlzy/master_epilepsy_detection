@@ -2,6 +2,7 @@ import argparse
 import torch
 from engines import registered_models, registered_optimizers, registered_datasets, registered_losses, registered_schedulers, EngineBase
 from engines.engine4Cla import Engine4Cla
+from engines.engien4Exp import Engine4Exp
 import warnings
 import datetime
 import time
@@ -11,6 +12,7 @@ warnings.filterwarnings('ignore')
 registered_engines = {
     "base": EngineBase,
     "cla": Engine4Cla,
+    "exp": Engine4Exp,
 }
 
 default_type = torch.float32

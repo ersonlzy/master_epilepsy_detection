@@ -18,7 +18,8 @@ class Metrics(nn.Module):
             pred_probas = pred_probas[:, 1]
         confmat = f.confusion_matrix(preds, trues, task = self.args.metric_type, num_classes=self.args.num_classes)
         prts = self.getPRTS(pred_probas, trues)
-        map = torch.mean(f.average_precision(pred_probas, trues, task = self.args.metric_type, num_classes=self.args.num_classes))
+        avg_prec = f.average_precision(pred_probas, trues, task = self.args.metric_type, num_classes=self.args.num_classes)
+        map = torch.mean(avg_prec) if avg_prec is not None else torch.tensor(0.0)
         recall = f.recall(preds, trues, task = self.args.metric_type, num_classes=self.args.num_classes)
         specificity = f.specificity(preds, trues, task = self.args.metric_type, num_classes=self.args.num_classes)
         precision = f.precision(preds, trues, task = self.args.metric_type, num_classes=self.args.num_classes)
